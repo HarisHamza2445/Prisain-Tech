@@ -25,7 +25,7 @@ export function About() {
           </p>
           <p>
             Saina, an aspiring cricketer who wanted a tech side hustle, teamed up with Priyanka, a web
-            designer. Haris joined soon after as CTO and lead software developer.
+            designer. Haris joined later as CTO and lead software developer.
           </p>
           <p>
             Together they grew from building custom websites to advanced AI automations, ads and complete
