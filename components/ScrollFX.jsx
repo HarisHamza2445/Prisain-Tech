@@ -186,14 +186,6 @@ export function ScrollFX() {
           clearProps: "transform,opacity",
           scrollTrigger: { trigger: ".channels", start: "top 84%", once: true },
         });
-        gsap.from(".mk", {
-          y: 30,
-          opacity: 0.2,
-          duration: 1,
-          ease: "expo.out",
-          stagger: 0.08,
-          scrollTrigger: { trigger: ".marks", start: "top 86%", once: true },
-        });
         gsap.from(".foot-brand, .foot-col", {
           y: 24,
           opacity: 0.2,

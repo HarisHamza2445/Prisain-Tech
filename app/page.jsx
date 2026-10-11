@@ -10,7 +10,6 @@ import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
 import { Cta } from "@/components/sections/Cta";
 import { Hero } from "@/components/sections/Hero";
-import { Mark } from "@/components/sections/Mark";
 import { Mission } from "@/components/sections/Mission";
 import { Packages } from "@/components/sections/Packages";
 import { Process } from "@/components/sections/Process";
@@ -41,7 +40,6 @@ export default function Page() {
         <Mission />
         <Cta />
         <Contact />
-        <Mark />
       </main>
       <Footer />
       <ScrollFX />
