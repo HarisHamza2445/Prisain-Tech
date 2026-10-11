@@ -52,6 +52,13 @@ export function Packages() {
     tabs.current[next.key].focus();
   };
 
+  // on a phone the tabs scroll sideways; keep the chosen one in view
+  useEffect(() => {
+    const tab = tabs.current[category];
+    const strip = tab?.parentElement;
+    if (strip) strip.scrollTo({ left: tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2 });
+  }, [category]);
+
   const list = PACKAGES.filter((p) => p.category === category);
   const code = category[0].toUpperCase();
 

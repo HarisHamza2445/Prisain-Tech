@@ -475,3 +475,14 @@ dialog.bk[open]::backdrop{animation:bdIn .4s ease}
 .tab:active{transform:scale(.97)}
 .foot-col a{display:inline-block;transition:color .3s,transform .4s var(--ease)}
 .foot-col a:hover{transform:translateX(4px)}
+
+/* ---------- phone: the package filter bar is one full-width row under the navbar ---------- */
+@media (max-width:700px){
+  .portal-bar{flex-wrap:nowrap;align-items:center;gap:10px;margin-inline:calc(-1 * var(--gutter));padding:6px var(--gutter) 0;margin-bottom:20px}
+  .tabs{flex:1;min-width:0;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+  .tab{padding:12px 10px 14px;font-size:10.5px;letter-spacing:.1em}
+  .tab::after{left:10px;right:10px}
+  .tab:last-child{margin-right:36px}
+  .cur{flex:none;margin-bottom:6px}
+  .cur button{padding:6px 10px;font-size:10.5px;letter-spacing:.08em}
+}
