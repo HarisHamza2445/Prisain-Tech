@@ -31,17 +31,15 @@ export function ScrollFX() {
       );
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        document
-          .querySelectorAll("[data-reveal]")
-          .forEach((el) =>
-            gsap.from(el.querySelectorAll(".ln>span"), {
-              yPercent: 105,
-              duration: 1.2,
-              ease: "expo.out",
-              stagger: 0.09,
-              scrollTrigger: { trigger: el, start: "top 85%", once: true },
-            }),
-          );
+        document.querySelectorAll("[data-reveal]").forEach((el) =>
+          gsap.from(el.querySelectorAll(".ln>span"), {
+            yPercent: 105,
+            duration: 1.2,
+            ease: "expo.out",
+            stagger: 0.09,
+            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          }),
+        );
         stRows.forEach((r) =>
           gsap.fromTo(
             r,
@@ -66,19 +64,17 @@ export function ScrollFX() {
             });
           },
         });
-        document
-          .querySelectorAll("[data-par]")
-          .forEach((el) =>
-            gsap.fromTo(
-              el,
-              { yPercent: +el.dataset.par },
-              {
-                yPercent: -el.dataset.par,
-                ease: "none",
-                scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
-              },
-            ),
-          );
+        document.querySelectorAll("[data-par]").forEach((el) =>
+          gsap.fromTo(
+            el,
+            { yPercent: +el.dataset.par },
+            {
+              yPercent: -el.dataset.par,
+              ease: "none",
+              scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+            },
+          ),
+        );
         const steps = [...document.querySelectorAll(".step")];
         steps.forEach((s) => s.classList.remove("lit"));
         gsap.fromTo(
@@ -134,18 +130,16 @@ export function ScrollFX() {
             scrollTrigger: { trigger: ".cta", start: "top bottom", end: "center center", scrub: true },
           },
         );
-        document
-          .querySelectorAll(".proj-info")
-          .forEach((p) =>
-            gsap.from(p.children, {
-              y: 30,
-              opacity: 0.15,
-              duration: 1.1,
-              ease: "expo.out",
-              stagger: 0.07,
-              scrollTrigger: { trigger: p, start: "top 82%", once: true },
-            }),
-          );
+        document.querySelectorAll(".proj-info").forEach((p) =>
+          gsap.from(p.children, {
+            y: 30,
+            opacity: 0.15,
+            duration: 1.1,
+            ease: "expo.out",
+            stagger: 0.07,
+            scrollTrigger: { trigger: p, start: "top 82%", once: true },
+          }),
+        );
         gsap.utils
           .toArray(".sec-head .label, main .lede, .pk-intro p, .statement-body .label")
           .forEach((el) =>
@@ -157,18 +151,16 @@ export function ScrollFX() {
               scrollTrigger: { trigger: el, start: "top 90%", once: true },
             }),
           );
-        document
-          .querySelectorAll(".mock")
-          .forEach((m) =>
-            gsap.from(m, {
-              scale: 0.94,
-              opacity: 0.3,
-              duration: 1.3,
-              ease: "expo.out",
-              clearProps: "transform,opacity",
-              scrollTrigger: { trigger: m, start: "top 85%", once: true },
-            }),
-          );
+        document.querySelectorAll(".mock").forEach((m) =>
+          gsap.from(m, {
+            scale: 0.94,
+            opacity: 0.3,
+            duration: 1.3,
+            ease: "expo.out",
+            clearProps: "transform,opacity",
+            scrollTrigger: { trigger: m, start: "top 85%", once: true },
+          }),
+        );
         gsap.from(".path > *", {
           x: -12,
           opacity: 0.1,
@@ -185,6 +177,23 @@ export function ScrollFX() {
           stagger: 0.12,
           clearProps: "transform,opacity",
           scrollTrigger: { trigger: ".channels", start: "top 84%", once: true },
+        });
+        gsap.from(".pr-step", {
+          y: 24,
+          opacity: 0.15,
+          duration: 0.9,
+          ease: "expo.out",
+          stagger: 0.08,
+          scrollTrigger: { trigger: ".pr-flow", start: "top 85%", once: true },
+        });
+        gsap.from(".pr-value", {
+          y: 28,
+          opacity: 0.15,
+          duration: 1,
+          ease: "expo.out",
+          stagger: 0.08,
+          clearProps: "transform,opacity",
+          scrollTrigger: { trigger: ".pr-values", start: "top 85%", once: true },
         });
         gsap.from(".foot-brand, .foot-col", {
           y: 24,
