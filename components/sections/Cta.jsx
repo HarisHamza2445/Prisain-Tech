@@ -6,7 +6,7 @@ export function Cta() {
       <span className="cta-ring" aria-hidden="true"></span>
       <span className="cta-ring r2" aria-hidden="true"></span>
       <span className="label" style={{ position: "relative", zIndex: "2", marginBottom: "28px" }}>
-        <b>09</b>
+        <b>10</b>
         {" — Your turn"}
       </span>
       <h2 className="display" id="cta-h" data-reveal>

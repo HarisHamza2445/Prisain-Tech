@@ -3,7 +3,7 @@ export function Work() {
     <section className="sec wrap" id="work" data-bg="#0A1022" aria-labelledby="work-h">
       <div className="sec-head">
         <span className="label">
-          <b>06</b>
+          <b>07</b>
           {" — Concept work"}
         </span>
         <h2 className="display d-l" id="work-h" data-reveal>

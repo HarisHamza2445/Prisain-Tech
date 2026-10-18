@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AGREEMENT_VERSION, agreementSections, newAgreementRef } from "@/lib/contract";
 import { signatureFont } from "@/lib/fonts";
+import { POLICY_PDF } from "@/lib/policy";
 import { waUrl } from "@/lib/site";
 
 const formatDate = (d) =>
@@ -103,14 +104,21 @@ async function buildPdf({ pkg, client, ref, signedAt, signature }) {
   };
   doc.setFont("helvetica", "bold");
   para("PRISAINTECH", 11, 2);
-  para("Client Service Agreement", 18, 4);
+  para("Company Policy, Pricing Terms & Service Agreement", 15, 4);
   doc.setFont("helvetica", "normal");
   para(`Reference ${ref} · Version ${AGREEMENT_VERSION}`, 9, 14);
   for (const s of agreementSections(pkg, client)) {
     doc.setFont("helvetica", "bold");
     para(s.heading, 10.5, 2);
     doc.setFont("helvetica", "normal");
-    para(s.body);
+    if (s.body) para(s.body);
+    if (s.parts)
+      for (const part of s.parts) {
+        doc.setFont("helvetica", "bold");
+        para(part.title, 9.5, 1);
+        doc.setFont("helvetica", "normal");
+        para(part.text, 9.5, 4);
+      }
     if (s.list) for (const item of s.list) para("•  " + item, 10, 2);
     y += 4;
   }
@@ -241,13 +249,26 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
       <span className="num">3</span>
       <div className="agree" inert={locked}>
         <h3>Sign the client agreement</h3>
-        <p>Read the terms for this package, then sign below. You&apos;ll get a signed PDF copy.</p>
+        <p>
+          Read the PrisainTech company policy and service agreement, then sign below. You&apos;ll get a signed
+          PDF copy.{" "}
+          <a className="linkish" href={POLICY_PDF} target="_blank" rel="noopener">
+            Original policy (PDF)
+          </a>
+        </p>
 
         <div className="agree-doc" tabIndex={0} aria-label="Client agreement">
           {agreementSections(pkg, client).map((s) => (
             <section key={s.heading}>
               <h4>{s.heading}</h4>
-              <p>{s.body}</p>
+              {s.body && <p>{s.body}</p>}
+              {s.parts &&
+                s.parts.map((part) => (
+                  <div className="agree-part" key={part.title}>
+                    <h5>{part.title}</h5>
+                    <p>{part.text}</p>
+                  </div>
+                ))}
               {s.list && (
                 <ul>
                   {s.list.map((item) => (
@@ -314,7 +335,8 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
 
             <label className="agree-check">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />I have
-              read and agree to the PrisainTech client agreement, and I&apos;m signing it electronically.
+              read and agree to the PrisainTech company policy and service agreement, and I&apos;m signing it
+              electronically.
             </label>
             {error && (
               <p className="agree-err" role="alert">

@@ -14,6 +14,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Mission } from "@/components/sections/Mission";
 import { Packages } from "@/components/sections/Packages";
 import { Process } from "@/components/sections/Process";
+import { Protocol } from "@/components/sections/Protocol";
 import { Services } from "@/components/sections/Services";
 import { Statement } from "@/components/sections/Statement";
 import { Work } from "@/components/sections/Work";
@@ -37,6 +38,7 @@ export default function Page() {
         <Services />
         <Packages />
         <Process />
+        <Protocol />
         <Work />
         <About />
         <Mission />

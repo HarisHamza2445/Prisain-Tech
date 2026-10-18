@@ -6,7 +6,7 @@ export function Contact() {
     <section className="sec wrap" id="contact" data-bg="#060913" aria-labelledby="ct-h">
       <div className="sec-head">
         <span className="label">
-          <b>10</b>
+          <b>11</b>
           {" — Contact"}
         </span>
         <h2 className="display d-m" id="ct-h">

@@ -46,6 +46,9 @@ export function Footer() {
               <a href="/#mission">Mission</a>
             </li>
             <li>
+              <a href="/#protocol">Protocol & values</a>
+            </li>
+            <li>
               <a href="/#contact">Contact</a>
             </li>
             <li>

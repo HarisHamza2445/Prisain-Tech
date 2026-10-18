@@ -3,7 +3,7 @@ export function About() {
     <section className="sec wrap" id="about" data-bg="#0C1226" aria-labelledby="about-h">
       <div className="story-grid">
         <span className="label" style={{ gridColumn: "1/-1", marginBottom: "24px" }}>
-          <b>07</b>
+          <b>08</b>
           {" — Our story"}
         </span>
         <h2 className="display" id="about-h" data-reveal>
