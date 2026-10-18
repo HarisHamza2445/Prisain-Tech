@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { NAV_LINKS, WA_GENERAL } from "@/lib/site";
 
 export function Nav() {
+  const home = usePathname() === "/";
+  // section links scroll on the home page and lead back to it from other pages
+  const hrefOf = (link) => link.href || (home ? `#${link.id}` : `/#${link.id}`);
   const [scrolled, setScrolled] = useState(false);
-  const [current, setCurrent] = useState(null);
+  const [current, setCurrent] = useState(home ? null : "careers");
   const [hovered, setHovered] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const progress = useRef(null);
@@ -28,16 +32,18 @@ export function Nav() {
 
   // which section is in the middle of the screen
   useEffect(() => {
+    if (!home) return;
     const io = new IntersectionObserver(
       (entries) => entries.forEach((entry) => entry.isIntersecting && setCurrent(entry.target.id)),
       { rootMargin: "-45% 0px -50% 0px" },
     );
-    NAV_LINKS.forEach(({ id }) => {
+    NAV_LINKS.forEach(({ id, href }) => {
+      if (href) return;
       const el = document.getElementById(id);
       if (el) io.observe(el);
     });
     return () => io.disconnect();
-  }, []);
+  }, [home]);
 
   // the highlight slides under the hovered link, else the current one
   useLayoutEffect(() => {
@@ -74,7 +80,7 @@ export function Nav() {
   return (
     <>
       <header className={scrolled ? "nav scrolled" : "nav"} id="nav">
-        <a className="brand" href="#top" aria-label="PrisainTech, back to top">
+        <a className="brand" href={home ? "#top" : "/"} aria-label="PrisainTech, back to top">
           <svg aria-hidden="true">
             <use href="#ps-mark" />
           </svg>
@@ -84,19 +90,19 @@ export function Nav() {
         </a>
         <nav aria-label="Primary">
           <ul className="nav-links" onMouseLeave={() => setHovered(null)}>
-            {NAV_LINKS.map(({ id, label }) => (
-              <li key={id}>
+            {NAV_LINKS.map((link) => (
+              <li key={link.id}>
                 <a
-                  href={`#${id}`}
+                  href={hrefOf(link)}
                   ref={(el) => {
-                    links.current[id] = el;
+                    links.current[link.id] = el;
                   }}
-                  aria-current={current === id ? "true" : "false"}
-                  onMouseEnter={() => setHovered(id)}
-                  onFocus={() => setHovered(id)}
+                  aria-current={current === link.id ? "true" : "false"}
+                  onMouseEnter={() => setHovered(link.id)}
+                  onFocus={() => setHovered(link.id)}
                   onBlur={() => setHovered(null)}
                 >
-                  {label}
+                  {link.label}
                 </a>
               </li>
             ))}
@@ -104,7 +110,7 @@ export function Nav() {
           </ul>
         </nav>
         <div className="nav-right">
-          <a className="btn btn-primary btn-sm" href="#booking">
+          <a className="btn btn-primary btn-sm" href={home ? "#booking" : "/#booking"}>
             Book now <span className="arr">→</span>
           </a>
           <button
@@ -126,16 +132,20 @@ export function Nav() {
           CLOSE
         </button>
         <ul>
-          {NAV_LINKS.map(({ id, label }) => (
-            <li key={id}>
-              <a className="big" href={`#${id}`} onClick={() => closeMenu(false)}>
-                {label}
+          {NAV_LINKS.map((link) => (
+            <li key={link.id}>
+              <a className="big" href={hrefOf(link)} onClick={() => closeMenu(false)}>
+                {link.label}
               </a>
             </li>
           ))}
         </ul>
         <div className="row">
-          <a className="btn btn-primary" href="#booking" onClick={() => closeMenu(false)}>
+          <a
+            className="btn btn-primary"
+            href={home ? "#booking" : "/#booking"}
+            onClick={() => closeMenu(false)}
+          >
             Book now <span className="arr">→</span>
           </a>
           <a

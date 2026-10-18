@@ -23,16 +23,16 @@ export function Footer() {
           <span className="label">Explore</span>
           <ul>
             <li>
-              <a href="#services">Services</a>
+              <a href="/#services">Services</a>
             </li>
             <li>
-              <a href="#booking">Packages</a>
+              <a href="/#booking">Packages</a>
             </li>
             <li>
-              <a href="#process">7-day delivery</a>
+              <a href="/#process">7-day delivery</a>
             </li>
             <li>
-              <a href="#work">Concept work</a>
+              <a href="/#work">Concept work</a>
             </li>
           </ul>
         </div>
@@ -40,13 +40,16 @@ export function Footer() {
           <span className="label">Studio</span>
           <ul>
             <li>
-              <a href="#about">Our story</a>
+              <a href="/#about">Our story</a>
             </li>
             <li>
-              <a href="#mission">Mission</a>
+              <a href="/#mission">Mission</a>
             </li>
             <li>
-              <a href="#contact">Contact</a>
+              <a href="/#contact">Contact</a>
+            </li>
+            <li>
+              <a href="/careers">Careers</a>
             </li>
           </ul>
         </div>
@@ -68,7 +71,7 @@ export function Footer() {
         </div>
         <div className="foot-base">
           <span className="label">© 2026 PrisainTech. All rights reserved.</span>
-          <a className="label" href="#top" style={{ textDecoration: "none" }}>
+          <a className="label" href="/#top" style={{ textDecoration: "none" }}>
             Back to top ↑
           </a>
         </div>

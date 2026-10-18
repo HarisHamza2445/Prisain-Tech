@@ -1,31 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { waUrl } from "@/lib/site";
-
-const ROLES = [
-  {
-    key: "marketing",
-    title: "Marketing",
-    text: "Social media, ads and campaigns for our clients.",
-  },
-  {
-    key: "ai",
-    title: "AI automation",
-    text: "Voice agents, WhatsApp bots and AI workflows.",
-  },
-];
+import { usePathname } from "next/navigation";
+import { ROLES, applyUrl } from "@/lib/careers";
 
 const STORAGE_KEY = "pt-hiring-closed";
 const HIDE_FOR_DAYS = 7;
-
-const applyLink = (role) =>
-  waUrl(`Hi PrisainTech! I saw you're hiring. I'd like to apply for the ${role} role.`);
 
 // A small corner card, shown once the visitor has had a moment with the page.
 // Closing it keeps it away for a week on this device.
 export function HiringPopup() {
   const [open, setOpen] = useState(false);
+  const onCareers = usePathname() === "/careers";
 
   useEffect(() => {
     try {
@@ -56,7 +42,7 @@ export function HiringPopup() {
     } catch {}
   };
 
-  if (!open) return null;
+  if (!open || onCareers) return null;
 
   return (
     <aside className="hiring" role="dialog" aria-labelledby="hiringTitle">
@@ -77,9 +63,9 @@ export function HiringPopup() {
           <li key={role.key}>
             <div>
               <h3>{role.title}</h3>
-              <p>{role.text}</p>
+              <p>{role.summary}</p>
             </div>
-            <a className="btn btn-wa btn-sm" href={applyLink(role.title)} target="_blank" rel="noopener">
+            <a className="btn btn-wa btn-sm" href={applyUrl(role.title)} target="_blank" rel="noopener">
               <svg aria-hidden="true">
                 <use href="#i-chat" />
               </svg>
@@ -88,7 +74,9 @@ export function HiringPopup() {
           </li>
         ))}
       </ul>
-      <p className="hiring-note">Opens WhatsApp with your message ready. Press send there.</p>
+      <p className="hiring-note">
+        Opens WhatsApp with your message ready. <a href="/careers">See role details</a>
+      </p>
     </aside>
   );
 }
