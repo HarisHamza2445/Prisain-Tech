@@ -25,15 +25,4 @@ To keep a copy of every signed agreement, set these in Vercel (see `.env.example
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — run `supabase/agreements.sql` in the Supabase SQL editor first. PDFs go to the private `agreements` bucket, details to the `agreements` table.
 - `RESEND_API_KEY`, `AGREEMENT_NOTIFY_EMAIL` — an email with the PDF attached for each signature.
 
-- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_NOTIFY_TO`, `WHATSAPP_TEMPLATE` — the signed PDF and the signer's details sent to your WhatsApp through the WhatsApp Business Platform (Meta). Create a **Utility** template named as in `WHATSAPP_TEMPLATE`, with a **Document** header and this body:
-
-  ```
-  New signed agreement
-  Name: {{1}}
-  WhatsApp: {{2}}
-  Package: {{3}}
-  Reference: {{4}}
-  Signed: {{5}}
-  ```
-
-Any one of these is enough. Without any, signing still works and the client is asked to send the PDF on WhatsApp.
+Either one is enough. Without any, signing still works and the client is asked to send the PDF on WhatsApp.
