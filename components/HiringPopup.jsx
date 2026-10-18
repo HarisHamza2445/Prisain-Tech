@@ -16,14 +16,19 @@ export function HiringPopup() {
     try {
       if (localStorage.getItem(STORAGE_KEY)) return;
     } catch {}
-    const show = () => setOpen(true);
-    const timer = setTimeout(show, 3000);
-    const onScroll = () => scrollY > innerHeight * 0.8 && show();
-    addEventListener("scroll", onScroll, { passive: true });
-    return () => {
+    // whichever comes first opens it, then both triggers are removed so it can't reopen
+    const stop = () => {
       clearTimeout(timer);
       removeEventListener("scroll", onScroll);
     };
+    const show = () => {
+      stop();
+      setOpen(true);
+    };
+    const timer = setTimeout(show, 3000);
+    const onScroll = () => scrollY > innerHeight * 0.8 && show();
+    addEventListener("scroll", onScroll, { passive: true });
+    return stop;
   }, []);
 
   // remember it as seen the moment it appears
