@@ -153,34 +153,6 @@ async function buildPdf({ pkg, client, ref, signedAt, signature }) {
 
 const download = (doc, ref) => doc.save(`PrisainTech-Agreement-${ref}.pdf`);
 
-// Sends the signed agreement to the studio's records. Signing still works if this fails.
-async function saveRecord({ pkg, client, ref, signedAt, signatureType, doc }) {
-  try {
-    const res = await fetch("/api/agreements", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ref,
-        version: AGREEMENT_VERSION,
-        signedAt: signedAt.toISOString(),
-        signatureType,
-        client,
-        pkg: {
-          name: pkg.name,
-          category: pkg.category,
-          inr: pkg.inr,
-          usd: pkg.usd,
-          recurring: pkg.recurring || null,
-        },
-        pdf: doc.output("datauristring").split(",")[1],
-      }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
   const canvasRef = useRef(null);
   const previewRef = useRef(null);
@@ -191,7 +163,7 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
   const [phone, setPhone] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [signed, setSigned] = useState(null); // { ref, signedAt, doc, saved }
+  const [signed, setSigned] = useState(null); // { ref, signedAt, doc }
   const [error, setError] = useState("");
 
   useEffect(() => setName((n) => n || defaultName), [defaultName]);
@@ -226,9 +198,7 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
       const record = { ref: newAgreementRef(), signedAt: new Date() };
       const doc = await buildPdf({ pkg, client, ...record, signature });
       download(doc, record.ref);
-      setSigned({ ...record, doc, saved: null });
-      const saved = await saveRecord({ pkg, client, ...record, signatureType: mode, doc });
-      setSigned((s) => s && { ...s, saved });
+      setSigned({ ...record, doc });
     } catch {
       setError("Something went wrong while creating the PDF. Please try again.");
     } finally {
@@ -245,7 +215,8 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
         "Name: " + client.name,
         ...(client.business ? ["Business: " + client.business] : []),
         "Signed: " + formatDate(signed.signedAt),
-        ...(signed.saved ? [] : ["", "I'm attaching the signed PDF here."]),
+        "",
+        "I'm attaching the signed PDF here.",
       ].join("\n")
     : "";
 
@@ -376,19 +347,15 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
               Your PDF copy has downloaded.
             </p>
             <p className="agree-note">
-              {signed.saved === null
-                ? "Sending a copy to PrisainTech…"
-                : signed.saved
-                  ? "PrisainTech has received a copy of the signed agreement."
-                  : "We couldn't send a copy automatically. Please send the PDF on WhatsApp."}
+              Send it to PrisainTech on WhatsApp to complete your booking: tap the button, attach the PDF and
+              press send.
             </p>
             <div className="agree-actions">
               <a className="btn btn-wa btn-sm" href={waUrl(confirmText)} target="_blank" rel="noopener">
                 <svg aria-hidden="true">
                   <use href="#i-chat" />
                 </svg>
-                {signed.saved ? "Confirm on WhatsApp" : "Send signed copy on WhatsApp"}{" "}
-                <span className="arr">↗</span>
+                Send signed copy on WhatsApp <span className="arr">↗</span>
               </a>
               <button type="button" className="linkish" onClick={() => download(signed.doc, signed.ref)}>
                 Download PDF again

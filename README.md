@@ -18,11 +18,4 @@ Set `NEXT_PUBLIC_SITE_URL` to the live address when deploying (used for share li
 
 ## Signed agreements
 
-The last booking step shows the client agreement (`lib/contract.js`). The client signs by typing their name (or drawing), and gets a signed PDF copy.
-
-To keep a copy of every signed agreement, set these in Vercel (see `.env.example`):
-
-- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — run `supabase/agreements.sql` in the Supabase SQL editor first. PDFs go to the private `agreements` bucket, details to the `agreements` table.
-- `RESEND_API_KEY`, `AGREEMENT_NOTIFY_EMAIL` — an email with the PDF attached for each signature.
-
-Either one is enough. Without any, signing still works and the client is asked to send the PDF on WhatsApp.
+The last booking step shows the client agreement (`lib/contract.js`). The client signs by typing their name (or drawing), and gets a signed PDF copy. The client sends it to PrisainTech on WhatsApp from the last step.
