@@ -50,6 +50,78 @@ async function emailStudio(row, pdfBase64) {
   return "sent";
 }
 
+// Sends the signed PDF and the signer's details to the studio's WhatsApp through the
+// WhatsApp Business Platform (Meta Cloud API). With WHATSAPP_TEMPLATE set it uses an approved
+// template (works any time); without it, a plain document message (only inside an open 24h chat).
+async function whatsappStudio(row, pdf) {
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const to = (process.env.WHATSAPP_NOTIFY_TO || "").replace(/\D/g, "");
+  if (!token || !phoneId || !to) return "not-configured";
+  const api = `https://graph.facebook.com/v21.0/${phoneId}`;
+  const filename = `PrisainTech-Agreement-${row.ref}.pdf`;
+
+  const form = new FormData();
+  form.append("messaging_product", "whatsapp");
+  form.append("type", "application/pdf");
+  form.append("file", new Blob([pdf], { type: "application/pdf" }), filename);
+  const upload = await fetch(`${api}/media`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  const media = await upload.json();
+  if (!upload.ok || !media.id) throw new Error("media " + upload.status + " " + JSON.stringify(media));
+
+  const signed = new Date(row.signed_at).toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  });
+  const document = { id: media.id, filename };
+  const template = process.env.WHATSAPP_TEMPLATE;
+  const message = template
+    ? {
+        type: "template",
+        template: {
+          name: template,
+          language: { code: process.env.WHATSAPP_TEMPLATE_LANG || "en" },
+          components: [
+            { type: "header", parameters: [{ type: "document", document }] },
+            {
+              type: "body",
+              parameters: [row.client_name, row.phone || "—", row.package_name, row.ref, signed + " IST"].map(
+                (value) => ({ type: "text", text: String(value) }),
+              ),
+            },
+          ],
+        },
+      }
+    : {
+        type: "document",
+        document: {
+          ...document,
+          caption: [
+            "New signed agreement",
+            `Name: ${row.client_name}`,
+            ...(row.business ? [`Business: ${row.business}`] : []),
+            `WhatsApp: ${row.phone || "—"}`,
+            `Package: ${row.package_name}`,
+            `Price: ${row.price}`,
+            `Reference: ${row.ref}`,
+            `Signed: ${signed} IST`,
+          ].join("\n"),
+        },
+      };
+  const send = await fetch(`${api}/messages`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ messaging_product: "whatsapp", to, ...message }),
+  });
+  if (!send.ok) throw new Error("send " + send.status + " " + (await send.text()));
+  return "sent";
+}
+
 export async function POST(request) {
   let body;
   try {
@@ -74,6 +146,7 @@ export async function POST(request) {
     signature_type: body.signatureType === "draw" ? "drawn" : "typed",
     client_name: text(body.client?.name, 120),
     business: text(body.client?.business, 160) || null,
+    phone: text(body.client?.phone, 30).replace(/[^\d+ ]/g, "") || null,
     package_name: text(body.pkg?.name, 120),
     price: [text(body.pkg?.inr, 40), text(body.pkg?.usd, 40), text(body.pkg?.recurring, 60)]
       .filter(Boolean)
@@ -93,11 +166,17 @@ export async function POST(request) {
     result.stored = "failed";
   }
   try {
+    result.whatsapp = await whatsappStudio(row, pdf);
+  } catch (e) {
+    console.error("agreement whatsapp failed:", e.message);
+    result.whatsapp = "failed";
+  }
+  try {
     result.emailed = await emailStudio(row, pdfBase64);
   } catch (e) {
     console.error("agreement email failed:", e.message);
     result.emailed = "failed";
   }
-  const ok = result.stored === "saved" || result.emailed === "sent";
+  const ok = result.stored === "saved" || result.emailed === "sent" || result.whatsapp === "sent";
   return Response.json({ ok, ...result }, { status: ok ? 200 : 503 });
 }

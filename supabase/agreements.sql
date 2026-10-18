@@ -7,6 +7,7 @@ create table if not exists public.agreements (
   signature_type text not null,
   client_name text not null,
   business text,
+  phone text,
   package_name text not null,
   price text,
   pdf_path text not null,
@@ -22,3 +23,6 @@ alter table public.agreements enable row level security;
 insert into storage.buckets (id, name, public)
 values ('agreements', 'agreements', false)
 on conflict (id) do nothing;
+
+-- If you created the table before the phone column existed:
+alter table public.agreements add column if not exists phone text;

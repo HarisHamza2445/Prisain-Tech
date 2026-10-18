@@ -140,6 +140,7 @@ async function buildPdf({ pkg, client, ref, signedAt, signature }) {
   for (const line of [
     client.name,
     ...(client.business ? [client.business] : []),
+    ...(client.phone ? [`WhatsApp: ${client.phone}`] : []),
     `Signed electronically on ${formatDate(signedAt)}`,
   ]) {
     doc.text(line, left, y);
@@ -187,6 +188,7 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
   const { hasInk, clear } = useSignaturePad(canvasRef, mode === "draw" && !locked);
   const [name, setName] = useState(defaultName);
   const [business, setBusiness] = useState(defaultBusiness);
+  const [phone, setPhone] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [signed, setSigned] = useState(null); // { ref, signedAt, doc, saved }
@@ -195,18 +197,21 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
   useEffect(() => setName((n) => n || defaultName), [defaultName]);
   useEffect(() => setBusiness((b) => b || defaultBusiness), [defaultBusiness]);
 
-  const client = { name: name.trim(), business: business.trim() };
+  const client = { name: name.trim(), business: business.trim(), phone: phone.trim() };
+  const phoneOk = client.phone.replace(/\D/g, "").length >= 10;
   const hasSignature = mode === "type" ? client.name.length > 1 : hasInk;
-  const ready = client.name.length > 1 && agreed && hasSignature;
+  const ready = client.name.length > 1 && phoneOk && agreed && hasSignature;
 
   const sign = async () => {
     if (!ready) {
       setError(
         client.name.length < 2
           ? "Add your full name."
-          : !hasSignature
-            ? "Draw your signature in the box."
-            : "Tick the box to agree.",
+          : !phoneOk
+            ? "Add your WhatsApp number so we can reach you."
+            : !hasSignature
+              ? "Draw your signature in the box."
+              : "Tick the box to agree.",
       );
       return;
     }
@@ -300,6 +305,18 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
                   placeholder="Optional"
                   value={business}
                   onChange={(e) => setBusiness(e.target.value)}
+                />
+              </label>
+              <label htmlFor="agPhone">
+                WhatsApp number
+                <input
+                  id="agPhone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="+91"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </label>
             </div>
