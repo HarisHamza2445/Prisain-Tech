@@ -547,3 +547,11 @@ dialog.bk[open]::backdrop{animation:bdIn .4s ease}
 .agree-done b{color:var(--ivory)}
 .agree-actions{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
 .agree-note{font-size:.82rem}
+.agree-studio{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.agree-studio-sign{font-size:2rem!important;line-height:1.2!important;color:var(--ivory)!important;margin:2px 0 0!important}
+.sig-modes{display:inline-flex;border:1px solid var(--line-strong);border-radius:999px;padding:3px}
+.sig-modes button{all:unset;cursor:pointer;padding:5px 12px;border-radius:999px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ivory-dim)}
+.sig-modes button[aria-pressed="true"]{background:var(--ivory);color:var(--ink)}
+.sig-modes button:focus-visible{outline:2px solid var(--cyan)}
+.sig-typed{display:grid;place-items:center;padding:0 16px;color:#0A0E1A;font-size:clamp(2.2rem,8vw,3.2rem);line-height:1;overflow:hidden;white-space:nowrap;cursor:default}
+.sig-placeholder{font-family:var(--f-body);font-size:.9rem;color:#8a8f9e}

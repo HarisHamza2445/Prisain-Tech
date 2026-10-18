@@ -1,31 +1,46 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AGREEMENT_VERSION, agreementSections, newAgreementRef } from "@/lib/contract";
+import { AGREEMENT_VERSION, STUDIO_SIGNATORY, agreementSections, newAgreementRef } from "@/lib/contract";
+import { signatureFont } from "@/lib/fonts";
 import { waUrl } from "@/lib/site";
 
 const formatDate = (d) =>
   d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" }) + " IST";
 
-// Signature pad: dark ink on a light card, sized for the screen's pixel density.
-function useSignaturePad(canvasRef) {
+// Writes a name in the signature face onto a transparent image.
+async function typedSignature(text, fontFamily) {
+  await document.fonts.load(`96px ${fontFamily}`);
+  const canvas = document.createElement("canvas");
+  canvas.width = 900;
+  canvas.height = 260;
+  const ctx = canvas.getContext("2d");
+  let size = 150;
+  do {
+    ctx.font = `${size}px ${fontFamily}`;
+    size -= 6;
+  } while (ctx.measureText(text).width > 840 && size > 40);
+  ctx.fillStyle = "#0A0E1A";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 450, 140);
+  return canvas.toDataURL("image/png");
+}
+
+// Draw-with-finger pad: dark ink on a light card, sized for the screen's pixel density.
+function useSignaturePad(canvasRef, active) {
   const [hasInk, setHasInk] = useState(false);
   useEffect(() => {
+    if (!active) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    const fit = () => {
-      const ratio = devicePixelRatio || 1;
-      const { width, height } = canvas.getBoundingClientRect();
-      canvas.width = width * ratio;
-      canvas.height = height * ratio;
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "#0A0E1A";
-      setHasInk(false);
-    };
-    fit();
+    const ratio = devicePixelRatio || 1;
+    const { width, height } = canvas.getBoundingClientRect();
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    Object.assign(ctx, { lineWidth: 2.2, lineCap: "round", lineJoin: "round", strokeStyle: "#0A0E1A" });
+    setHasInk(false);
     let drawing = false;
     const point = (e) => {
       const r = canvas.getBoundingClientRect();
@@ -54,7 +69,7 @@ function useSignaturePad(canvasRef) {
       canvas.removeEventListener("pointerup", up);
       canvas.removeEventListener("pointercancel", up);
     };
-  }, [canvasRef]);
+  }, [canvasRef, active]);
 
   const clear = () => {
     const canvas = canvasRef.current;
@@ -64,7 +79,7 @@ function useSignaturePad(canvasRef) {
   return { hasInk, clear };
 }
 
-async function buildPdf({ pkg, client, ref, signedAt, signature }) {
+async function buildPdf({ pkg, client, ref, signedAt, signature, studioSignature }) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const left = 56,
@@ -99,57 +114,125 @@ async function buildPdf({ pkg, client, ref, signedAt, signature }) {
     if (s.list) for (const item of s.list) para("•  " + item, 10, 2);
     y += 4;
   }
-  ensure(170);
-  y += 8;
-  doc.setFont("helvetica", "bold");
-  para("Signed by the Client", 10.5, 6);
-  doc.addImage(signature, "PNG", left, y, 200, 70);
-  y += 78;
-  doc.setDrawColor(150);
-  doc.line(left, y, left + 220, y);
-  y += 16;
-  doc.setFont("helvetica", "normal");
-  para(`Name: ${client.name}`, 10, 0);
-  if (client.business) para(`Business: ${client.business}`, 10, 0);
-  para(`Signed electronically on ${formatDate(signedAt)}`, 10, 0);
-  para(`Package: ${pkg.name}`, 10, 0);
-  doc.save(`PrisainTech-Agreement-${ref}.pdf`);
+
+  // two signature blocks side by side
+  ensure(190);
+  y += 10;
+  const col = (x, title, image, lines) => {
+    let yy = y;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.text(title, x, yy);
+    yy += 10;
+    doc.addImage(image, "PNG", x, yy, 210, 61);
+    yy += 66;
+    doc.setDrawColor(150);
+    doc.line(x, yy, x + 220, yy);
+    yy += 16;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    for (const line of lines) {
+      doc.text(line, x, yy);
+      yy += 13;
+    }
+    return yy;
+  };
+  const when = `Signed electronically on ${formatDate(signedAt)}`;
+  const yClient = col(left, "Client", signature, [
+    client.name,
+    ...(client.business ? [client.business] : []),
+    when,
+  ]);
+  const yStudio = col(left + 263, "For PrisainTech", studioSignature, [
+    STUDIO_SIGNATORY.name,
+    STUDIO_SIGNATORY.title,
+    when,
+  ]);
+  y = Math.max(yClient, yStudio) + 10;
+  para(`Package: ${pkg.name} · Reference ${ref}`, 9, 0);
+  return doc;
+}
+
+const download = (doc, ref) => doc.save(`PrisainTech-Agreement-${ref}.pdf`);
+
+// Sends the signed agreement to the studio's records. Signing still works if this fails.
+async function saveRecord({ pkg, client, ref, signedAt, signatureType, doc }) {
+  try {
+    const res = await fetch("/api/agreements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ref,
+        version: AGREEMENT_VERSION,
+        signedAt: signedAt.toISOString(),
+        signatureType,
+        client,
+        pkg: {
+          name: pkg.name,
+          category: pkg.category,
+          inr: pkg.inr,
+          usd: pkg.usd,
+          recurring: pkg.recurring || null,
+        },
+        pdf: doc.output("datauristring").split(",")[1],
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
   const canvasRef = useRef(null);
-  const { hasInk, clear } = useSignaturePad(canvasRef);
+  const previewRef = useRef(null);
+  const [mode, setMode] = useState("type");
+  const { hasInk, clear } = useSignaturePad(canvasRef, mode === "draw" && !locked);
   const [name, setName] = useState(defaultName);
   const [business, setBusiness] = useState(defaultBusiness);
   const [agreed, setAgreed] = useState(false);
-  const [signed, setSigned] = useState(null); // { ref, signedAt, signature }
+  const [busy, setBusy] = useState(false);
+  const [signed, setSigned] = useState(null); // { ref, signedAt, doc, saved }
   const [error, setError] = useState("");
 
   useEffect(() => setName((n) => n || defaultName), [defaultName]);
   useEffect(() => setBusiness((b) => b || defaultBusiness), [defaultBusiness]);
 
   const client = { name: name.trim(), business: business.trim() };
-  const ready = client.name.length > 1 && agreed && hasInk;
+  const hasSignature = mode === "type" ? client.name.length > 1 : hasInk;
+  const ready = client.name.length > 1 && agreed && hasSignature;
 
   const sign = async () => {
     if (!ready) {
       setError(
-        !client.name
+        client.name.length < 2
           ? "Add your full name."
-          : !hasInk
+          : !hasSignature
             ? "Draw your signature in the box."
             : "Tick the box to agree.",
       );
       return;
     }
     setError("");
-    const record = {
-      ref: newAgreementRef(),
-      signedAt: new Date(),
-      signature: canvasRef.current.toDataURL("image/png"),
-    };
-    setSigned(record);
-    await buildPdf({ pkg, client, ...record });
+    setBusy(true);
+    try {
+      const family = getComputedStyle(previewRef.current).fontFamily;
+      const signature =
+        mode === "type"
+          ? await typedSignature(client.name, family)
+          : canvasRef.current.toDataURL("image/png");
+      const studioSignature = await typedSignature(STUDIO_SIGNATORY.name, family);
+      const record = { ref: newAgreementRef(), signedAt: new Date() };
+      const doc = await buildPdf({ pkg, client, ...record, signature, studioSignature });
+      download(doc, record.ref);
+      setSigned({ ...record, doc, saved: null });
+      const saved = await saveRecord({ pkg, client, ...record, signatureType: mode, doc });
+      setSigned((s) => s && { ...s, saved });
+    } catch {
+      setError("Something went wrong while creating the PDF. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const confirmText = signed
@@ -161,8 +244,7 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
         "Name: " + client.name,
         ...(client.business ? ["Business: " + client.business] : []),
         "Signed: " + formatDate(signed.signedAt),
-        "",
-        "I'm attaching the signed PDF here.",
+        ...(signed.saved ? [] : ["", "I'm attaching the signed PDF here."]),
       ].join("\n")
     : "";
 
@@ -187,6 +269,13 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
               )}
             </section>
           ))}
+          <section className="agree-studio">
+            <h4>Signed for PrisainTech</h4>
+            <p className={`agree-studio-sign ${signatureFont.className}`}>{STUDIO_SIGNATORY.name}</p>
+            <p>
+              {STUDIO_SIGNATORY.name}, {STUDIO_SIGNATORY.title}
+            </p>
+          </section>
         </div>
 
         {!signed ? (
@@ -212,18 +301,39 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
                 />
               </label>
             </div>
+
             <div className="sig">
               <div className="sig-head">
-                <span className="label">Signature</span>
-                <button type="button" className="linkish" onClick={clear}>
-                  Clear
-                </button>
+                <div className="sig-modes" role="group" aria-label="How to sign">
+                  <button type="button" aria-pressed={mode === "type"} onClick={() => setMode("type")}>
+                    Type
+                  </button>
+                  <button type="button" aria-pressed={mode === "draw"} onClick={() => setMode("draw")}>
+                    Draw
+                  </button>
+                </div>
+                {mode === "draw" && (
+                  <button type="button" className="linkish" onClick={clear}>
+                    Clear
+                  </button>
+                )}
               </div>
-              <canvas ref={canvasRef} className="sig-pad" aria-label="Draw your signature" />
+              <div
+                ref={previewRef}
+                className={`sig-pad sig-typed ${signatureFont.className}`}
+                hidden={mode !== "type"}
+                aria-label="Your signature"
+              >
+                {client.name || <span className="sig-placeholder">Your signature appears here</span>}
+              </div>
+              {mode === "draw" && (
+                <canvas ref={canvasRef} className="sig-pad" aria-label="Draw your signature" />
+              )}
             </div>
+
             <label className="agree-check">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />I have
-              read and agree to the PrisainTech client agreement.
+              read and agree to the PrisainTech client agreement, and I&apos;m signing it electronically.
             </label>
             {error && (
               <p className="agree-err" role="alert">
@@ -234,8 +344,9 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
               type="button"
               className={ready ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"}
               onClick={sign}
+              disabled={busy}
             >
-              Sign agreement <span className="arr">→</span>
+              {busy ? "Signing…" : "Sign agreement"} <span className="arr">→</span>
             </button>
           </>
         ) : (
@@ -244,20 +355,25 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
               Signed by <b>{client.name}</b> on {formatDate(signed.signedAt)}. Reference <b>{signed.ref}</b>.
               Your PDF copy has downloaded.
             </p>
+            <p className="agree-note">
+              {signed.saved === null
+                ? "Sending a copy to PrisainTech…"
+                : signed.saved
+                  ? "PrisainTech has received a copy of the signed agreement."
+                  : "We couldn't send a copy automatically. Please send the PDF on WhatsApp."}
+            </p>
             <div className="agree-actions">
               <a className="btn btn-wa btn-sm" href={waUrl(confirmText)} target="_blank" rel="noopener">
                 <svg aria-hidden="true">
                   <use href="#i-chat" />
                 </svg>
-                Send signed copy on WhatsApp <span className="arr">↗</span>
+                {signed.saved ? "Confirm on WhatsApp" : "Send signed copy on WhatsApp"}{" "}
+                <span className="arr">↗</span>
               </a>
-              <button type="button" className="linkish" onClick={() => buildPdf({ pkg, client, ...signed })}>
+              <button type="button" className="linkish" onClick={() => download(signed.doc, signed.ref)}>
                 Download PDF again
               </button>
             </div>
-            <p className="agree-note">
-              WhatsApp opens with the details filled in. Attach the PDF there and press send.
-            </p>
           </div>
         )}
       </div>
