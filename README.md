@@ -18,7 +18,7 @@ Set `NEXT_PUBLIC_SITE_URL` to the live address when deploying (used for share li
 
 ## Signed agreements
 
-The last booking step shows the client agreement (`lib/contract.js`). The client signs by typing their name (or drawing), and gets a PDF signed by them and by PrisainTech (`STUDIO_SIGNATORY`).
+The last booking step shows the client agreement (`lib/contract.js`). The client signs by typing their name (or drawing), and gets a signed PDF copy.
 
 To keep a copy of every signed agreement, set these in Vercel (see `.env.example`):
 

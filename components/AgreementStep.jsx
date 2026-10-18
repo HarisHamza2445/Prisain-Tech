@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AGREEMENT_VERSION, STUDIO_SIGNATORY, agreementSections, newAgreementRef } from "@/lib/contract";
+import { AGREEMENT_VERSION, agreementSections, newAgreementRef } from "@/lib/contract";
 import { signatureFont } from "@/lib/fonts";
 import { waUrl } from "@/lib/site";
 
@@ -79,7 +79,7 @@ function useSignaturePad(canvasRef, active) {
   return { hasInk, clear };
 }
 
-async function buildPdf({ pkg, client, ref, signedAt, signature, studioSignature }) {
+async function buildPdf({ pkg, client, ref, signedAt, signature }) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const left = 56,
@@ -115,40 +115,29 @@ async function buildPdf({ pkg, client, ref, signedAt, signature, studioSignature
     y += 4;
   }
 
-  // two signature blocks side by side
+  // the client's signature block
   ensure(190);
   y += 10;
-  const col = (x, title, image, lines) => {
-    let yy = y;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
-    doc.text(title, x, yy);
-    yy += 10;
-    doc.addImage(image, "PNG", x, yy, 210, 61);
-    yy += 66;
-    doc.setDrawColor(150);
-    doc.line(x, yy, x + 220, yy);
-    yy += 16;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
-    for (const line of lines) {
-      doc.text(line, x, yy);
-      yy += 13;
-    }
-    return yy;
-  };
-  const when = `Signed electronically on ${formatDate(signedAt)}`;
-  const yClient = col(left, "Client", signature, [
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.text("Signed by the Client", left, y);
+  y += 10;
+  doc.addImage(signature, "PNG", left, y, 210, 61);
+  y += 66;
+  doc.setDrawColor(150);
+  doc.line(left, y, left + 240, y);
+  y += 16;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  for (const line of [
     client.name,
     ...(client.business ? [client.business] : []),
-    when,
-  ]);
-  const yStudio = col(left + 263, "For PrisainTech", studioSignature, [
-    STUDIO_SIGNATORY.name,
-    STUDIO_SIGNATORY.title,
-    when,
-  ]);
-  y = Math.max(yClient, yStudio) + 10;
+    `Signed electronically on ${formatDate(signedAt)}`,
+  ]) {
+    doc.text(line, left, y);
+    y += 13;
+  }
+  y += 10;
   para(`Package: ${pkg.name} · Reference ${ref}`, 9, 0);
   return doc;
 }
@@ -221,9 +210,8 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
         mode === "type"
           ? await typedSignature(client.name, family)
           : canvasRef.current.toDataURL("image/png");
-      const studioSignature = await typedSignature(STUDIO_SIGNATORY.name, family);
       const record = { ref: newAgreementRef(), signedAt: new Date() };
-      const doc = await buildPdf({ pkg, client, ...record, signature, studioSignature });
+      const doc = await buildPdf({ pkg, client, ...record, signature });
       download(doc, record.ref);
       setSigned({ ...record, doc, saved: null });
       const saved = await saveRecord({ pkg, client, ...record, signatureType: mode, doc });
@@ -269,13 +257,6 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
               )}
             </section>
           ))}
-          <section className="agree-studio">
-            <h4>Signed for PrisainTech</h4>
-            <p className={`agree-studio-sign ${signatureFont.className}`}>{STUDIO_SIGNATORY.name}</p>
-            <p>
-              {STUDIO_SIGNATORY.name}, {STUDIO_SIGNATORY.title}
-            </p>
-          </section>
         </div>
 
         {!signed ? (
