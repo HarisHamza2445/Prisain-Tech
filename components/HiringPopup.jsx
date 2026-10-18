@@ -4,17 +4,17 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ROLES, applyUrl } from "@/lib/careers";
 
-const STORAGE_KEY = "pt-hiring-closed";
+const STORAGE_KEY = "pt-hiring-seen";
 
 // A small corner card, shown once the visitor has had a moment with the page.
-// Closing it hides it for the rest of this visit; it comes back on the next one.
+// Each device sees it only once; after that the roles live on /careers and in the footer.
 export function HiringPopup() {
   const [open, setOpen] = useState(false);
   const onCareers = usePathname() === "/careers";
 
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(STORAGE_KEY)) return;
+      if (localStorage.getItem(STORAGE_KEY)) return;
     } catch {}
     const show = () => setOpen(true);
     const timer = setTimeout(show, 3000);
@@ -26,6 +26,14 @@ export function HiringPopup() {
     };
   }, []);
 
+  // remember it as seen the moment it appears
+  useEffect(() => {
+    if (!open || onCareers) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    } catch {}
+  }, [open, onCareers]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && close();
@@ -33,12 +41,7 @@ export function HiringPopup() {
     return () => removeEventListener("keydown", onKey);
   }, [open]);
 
-  const close = () => {
-    setOpen(false);
-    try {
-      sessionStorage.setItem(STORAGE_KEY, "1");
-    } catch {}
-  };
+  const close = () => setOpen(false);
 
   if (!open || onCareers) return null;
 
