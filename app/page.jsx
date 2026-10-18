@@ -1,4 +1,5 @@
 import { Footer } from "@/components/Footer";
+import { HiringPopup } from "@/components/HiringPopup";
 import { Intro } from "@/components/Intro";
 import { Nav } from "@/components/Nav";
 import { ScrollFX } from "@/components/ScrollFX";
@@ -29,6 +30,7 @@ export default function Page() {
       <Stage3D />
       <Nav />
       <WhatsAppFab />
+      <HiringPopup />
       <main id="main">
         <Hero />
         <Statement />
