@@ -599,3 +599,8 @@ dialog.bk[open]::backdrop{animation:bdIn .4s ease}
 .agree-part{margin-top:6px}
 .agree-part h5{margin:0 0 2px;font-size:.86rem;font-weight:650;color:var(--ivory)}
 @media (max-width:1000px){.pr-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- navbar: tighter links on smaller laptop screens so seven fit beside the logo ---------- */
+@media (min-width:1021px) and (max-width:1240px){
+  .nav-links a{padding:9px 9px;letter-spacing:.08em;font-size:10.5px}
+}
