@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AgreementStep } from "@/components/AgreementStep";
 import { useCopy, useToast } from "@/components/Toast";
 import { CATEGORIES, PACKAGES } from "@/lib/packages";
 import { SITE, waUrl } from "@/lib/site";
@@ -302,6 +303,13 @@ function BookingDialog({ pkg, onClose }) {
               </p>
             </div>
           </div>
+          <AgreementStep
+            key={pkg.name}
+            pkg={pkg}
+            defaultName={name}
+            defaultBusiness={business}
+            locked={!formDone}
+          />
           <div className="bk-foot">
             <span>
               Prefer email? Write to <b style={{ color: "var(--ivory)", userSelect: "all" }}>{SITE.email}</b>

@@ -525,3 +525,25 @@ dialog.bk[open]::backdrop{animation:bdIn .4s ease}
 .careers-how li{counter-increment:step;display:grid;gap:10px;padding-top:16px;border-top:1px solid var(--line-strong);color:var(--ivory-dim)}
 .careers-how li::before{content:"0" counter(step);font-family:var(--f-mono);font-size:12px;color:var(--cyan);letter-spacing:.1em}
 @media (max-width:800px){.role{grid-template-columns:minmax(0,1fr)}.careers-how ol{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- booking step 3: client agreement ---------- */
+.agree{display:grid;gap:14px;min-width:0}
+.agree>h3,.agree>p{margin-bottom:0}
+.agree-doc{max-height:260px;overflow:auto;padding:16px 18px;border:1px solid var(--line-strong);border-radius:6px;background:rgba(244,240,232,.04);font-size:.88rem;line-height:1.55;color:var(--ivory-dim)}
+.agree-doc section+section{margin-top:12px}
+.agree-doc h4{margin:0 0 4px;font-size:.9rem;font-weight:650;color:var(--ivory)}
+.agree-doc p{margin:0;font-size:inherit}
+.agree-doc ul{margin:6px 0 0;padding-left:18px}
+.agree .bk-fields{margin-bottom:0}
+.sig{display:grid;gap:8px}
+.sig-head{display:flex;justify-content:space-between;align-items:center}
+.sig-pad{display:block;width:100%;height:120px;border-radius:6px;background:#F4F0E8;touch-action:none;cursor:crosshair}
+.agree-check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ivory-dim);cursor:pointer}
+.agree-check input{margin-top:3px;accent-color:var(--cyan);width:16px;height:16px;flex:none}
+.agree-err{margin:0;color:#FFB46B;font-size:.88rem}
+.agree>.btn{justify-self:start}
+.agree-done{display:grid;gap:12px}
+.agree-done p{margin:0;color:var(--ivory-dim)}
+.agree-done b{color:var(--ivory)}
+.agree-actions{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.agree-note{font-size:.82rem}
