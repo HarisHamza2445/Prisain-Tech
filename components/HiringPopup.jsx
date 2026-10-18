@@ -5,21 +5,19 @@ import { usePathname } from "next/navigation";
 import { ROLES, applyUrl } from "@/lib/careers";
 
 const STORAGE_KEY = "pt-hiring-closed";
-const HIDE_FOR_DAYS = 7;
 
 // A small corner card, shown once the visitor has had a moment with the page.
-// Closing it keeps it away for a week on this device.
+// Closing it hides it for the rest of this visit; it comes back on the next one.
 export function HiringPopup() {
   const [open, setOpen] = useState(false);
   const onCareers = usePathname() === "/careers";
 
   useEffect(() => {
     try {
-      const closedAt = Number(localStorage.getItem(STORAGE_KEY));
-      if (closedAt && Date.now() - closedAt < HIDE_FOR_DAYS * 864e5) return;
+      if (sessionStorage.getItem(STORAGE_KEY)) return;
     } catch {}
     const show = () => setOpen(true);
-    const timer = setTimeout(show, 6000);
+    const timer = setTimeout(show, 3000);
     const onScroll = () => scrollY > innerHeight * 0.8 && show();
     addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -38,7 +36,7 @@ export function HiringPopup() {
   const close = () => {
     setOpen(false);
     try {
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      sessionStorage.setItem(STORAGE_KEY, "1");
     } catch {}
   };
 
