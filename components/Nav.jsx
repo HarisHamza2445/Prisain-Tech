@@ -90,7 +90,7 @@ export function Nav() {
         </a>
         <nav aria-label="Primary">
           <ul className="nav-links" onMouseLeave={() => setHovered(null)}>
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter((link) => !link.desktopHidden).map((link) => (
               <li key={link.id}>
                 <a
                   href={hrefOf(link)}
