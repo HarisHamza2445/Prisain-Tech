@@ -14,7 +14,7 @@ export function Mission() {
         </div>
         <div className="mission-copy">
           <span className="label">
-            <b>09</b>
+            <b>11</b>
             {" — Mission & vision"}
           </span>
           <h2 className="display" id="ms-h">

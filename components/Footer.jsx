@@ -29,6 +29,9 @@ export function Footer() {
               <a href="/#booking">Packages</a>
             </li>
             <li>
+              <a href="/#terms">Investment terms</a>
+            </li>
+            <li>
               <a href="/#process">7-day delivery</a>
             </li>
             <li>

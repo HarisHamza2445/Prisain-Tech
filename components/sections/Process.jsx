@@ -7,7 +7,7 @@ export function Process() {
         <div className="process-head">
           <div className="inner">
             <span className="label">
-              <b>05</b> — Signature 7-day delivery
+              <b>07</b> — Signature 7-day delivery
             </span>
             <h2 className="display d-m" id="proc-h" data-reveal>
               <span className="ln">

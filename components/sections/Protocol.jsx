@@ -50,7 +50,7 @@ export function Protocol() {
     <section className="sec wrap" id="protocol" data-bg="#0A1022" aria-labelledby="pr-h">
       <div className="sec-head">
         <span className="label">
-          <b>06</b> — Protocol, rules &amp; values
+          <b>08</b> — Protocol, rules &amp; values
         </span>
         <h2 className="display d-l" id="pr-h" data-reveal>
           <span className="ln">

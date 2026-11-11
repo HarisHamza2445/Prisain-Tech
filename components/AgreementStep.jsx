@@ -147,7 +147,7 @@ async function buildPdf({ pkg, client, ref, signedAt, signature }) {
     y += 13;
   }
   y += 10;
-  para(`Package: ${pkg.name} · Reference ${ref}`, 9, 0);
+  para(`Package: ${pkg.name} · Total ${pkg.total} · Reference ${ref}`, 9, 0);
   return doc;
 }
 
@@ -212,6 +212,7 @@ export function AgreementStep({ pkg, defaultName, defaultBusiness, locked }) {
         "",
         "Reference: " + signed.ref,
         "Package: " + pkg.name,
+        "Total: " + pkg.total,
         "Name: " + client.name,
         ...(client.business ? ["Business: " + client.business] : []),
         "Signed: " + formatDate(signed.signedAt),
